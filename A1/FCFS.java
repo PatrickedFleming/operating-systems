@@ -7,7 +7,11 @@ import java.util.ArrayList;
 
 public class FCFS {
 
-    private Output fcfsOutput = new Output();
+    private static Output fcfsOutput;
+
+    public FCFS(ArrayList<ProcessInfo> input){
+        fcfsOutput = new Output(input);
+    }
     
     public void run(ArrayList<ProcessInfo> input, int DISP){
         int time = 0;
@@ -24,29 +28,26 @@ public class FCFS {
                 //add disp to time
                 time += DISP;
                 //add process to output
-                fcfsOutput.addProcessOrder("p" + input.get(0).getPid());
+                fcfsOutput.addProcessOrder(input.get(0).getPid());
                 //add process priority to output
                 fcfsOutput.addProcessPriority(input.get(0).getPriority());
                 //add process start time to output
                 fcfsOutput.addProcessStartTimes(time);
                 //add process wait time to output
-                fcfsOutput.addProcessWaitTimes(time - input.get(0).getArrivalTime());
-                //add process time to output
-                fcfsOutput.addProcessTimes(input.get(0).getServiceTime());
+                fcfsOutput.addProcessWaitTimes(input.get(0).getPid(),time - input.get(0).getArrivalTime());
                 //add service time to time
                 time += input.get(0).getServiceTime();
                 //add process turn around time to output
-                fcfsOutput.addProcessTurnAroundTimes(time - input.get(0).getArrivalTime());
+                fcfsOutput.addProcessTurnAroundTimes(input.get(0).getPid(),time - input.get(0).getArrivalTime());
                 //remove process from input
                 input.remove(0);
             }
-
-            //calculates average wait time
-            fcfsOutput.setProcessAverageWaitTimes(fcfsOutput.averageWaitTime());
-
-            //calculates average turn around time
-            fcfsOutput.setProcessAverageTurnAroundTimes(fcfsOutput.averageTurnAroundTime());
         }
+    }
+
+    //get output
+    public Output getOutput(){
+        return fcfsOutput;
     }
 
 

@@ -25,10 +25,10 @@ public class A1 {
         ArrayList<ProcessInfo> prrProcesses = copyArray(processes);
 
         //creates sheduling algorithm classes
-        FCFS fcfs = new FCFS();
-        SPN spn = new SPN();
-        PP pp = new PP();
-        PRR prr = new PRR();
+        FCFS fcfs = new FCFS(processes);
+        SPN spn = new SPN(processes);
+        PP pp = new PP(processes);
+        PRR prr = new PRR(processes);
 
         //runs scheduling algorithms
         //orders processes by arrival time
@@ -42,14 +42,16 @@ public class A1 {
         ppProcesses.sort(new PPComparator());
         pp.run(ppProcesses, DISP);
 
-        prrProcesses.sort(new PPComparator());
         prr.run(prrProcesses, DISP);
+
+        SummaryOutput sum = new SummaryOutput(fcfs.getOutput(), spn.getOutput(), pp.getOutput(), prr.getOutput());
 
         //prints output
         System.out.println(fcfs);
         System.out.println(spn);
         System.out.println(pp);
         System.out.println(prr);
+        System.out.println(sum);
     }
 
     private static void inputProcesses(File inputFile){
@@ -71,7 +73,7 @@ public class A1 {
         //create process objects
         int pid = 1;
         for(int i = 1; i < tempList.size(); i+=3){
-           ProcessInfo tempProcess = new ProcessInfo(pid, tempList.get(i), tempList.get(i+1), tempList.get(i+2));
+           ProcessInfo tempProcess = new ProcessInfo(pid, tempList.get(i), tempList.get(i+1), tempList.get(i+2), tempList.get(i+1));
            pid++;
            processes.add(tempProcess);
         }
@@ -85,7 +87,7 @@ public class A1 {
     public static ArrayList<ProcessInfo> copyArray(ArrayList<ProcessInfo> input){
         ArrayList<ProcessInfo> output = new ArrayList<ProcessInfo>();
         for(int i = 0; i < input.size(); i++){
-            output.add(new ProcessInfo(input.get(i).getPid(), input.get(i).getArrivalTime(), input.get(i).getServiceTime(), input.get(i).getPriority()));
+            output.add(new ProcessInfo(input.get(i).getPid(), input.get(i).getArrivalTime(), input.get(i).getServiceTime(), input.get(i).getPriority(), input.get(i).getCurrServiceTime()));
         }
         return output;
     }

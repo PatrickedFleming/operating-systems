@@ -7,7 +7,11 @@ import java.util.ArrayList;
 
 public class PP {
 
-    private Output ppOutput = new Output();
+    private Output ppOutput;
+
+    public PP(ArrayList<ProcessInfo> input){
+        ppOutput = new Output(input);
+    }
     
     public void run(ArrayList<ProcessInfo> input, int disp){
         int time = 0;
@@ -24,28 +28,26 @@ public class PP {
                 //disp
                 time += disp;
                 //add process to output
-                ppOutput.addProcessOrder("p" + input.get(0).getPid());
+                ppOutput.addProcessOrder(input.get(0).getPid());
                 //add process priority to output
                 ppOutput.addProcessPriority(input.get(0).getPriority());
                 //add process start time to output
                 ppOutput.addProcessStartTimes(time);
                 //add process wait time to output
-                ppOutput.addProcessWaitTimes(time - input.get(0).getArrivalTime());
-                //add process time to output
-                ppOutput.addProcessTimes(input.get(0).getServiceTime());
+                ppOutput.addProcessWaitTimes(input.get(0).getPid(),time - input.get(0).getArrivalTime());
                 //add service time to time
                 time += input.get(0).getServiceTime();
                 //add process turn around time to output
-                ppOutput.addProcessTurnAroundTimes(time - input.get(0).getArrivalTime());
+                ppOutput.addProcessTurnAroundTimes(input.get(0).getPid(),time - input.get(0).getArrivalTime());
                 //remove process from input
                 input.remove(0);
             }
-            
-            //calcs average
-            ppOutput.setProcessAverageWaitTimes(ppOutput.averageWaitTime());
-            ppOutput.setProcessAverageTurnAroundTimes(ppOutput.averageTurnAroundTime());
-
         }
+    }
+
+    //get output
+    public Output getOutput(){
+        return ppOutput;
     }
 
     //prints output in format

@@ -7,7 +7,11 @@ import java.util.ArrayList;
 
 public class SPN {
 
-    private Output spnOutput = new Output();
+    private static Output spnOutput;
+
+    public SPN(ArrayList<ProcessInfo> input){
+       spnOutput = new Output(input);
+    }
     
     public void run(ArrayList<ProcessInfo> input, int disp){
         int time = 0;
@@ -24,27 +28,27 @@ public class SPN {
                 //disp
                 time += disp;
                 //add process to output
-                spnOutput.addProcessOrder("p" + input.get(0).getPid());
+                spnOutput.addProcessOrder(input.get(0).getPid());
                 //add process priority to output
                 spnOutput.addProcessPriority(input.get(0).getPriority());
                 //add process start time to output
                 spnOutput.addProcessStartTimes(time);
                 //add process wait time to output
-                spnOutput.addProcessWaitTimes(time - input.get(0).getArrivalTime());
-                //add process time to output
-                spnOutput.addProcessTimes(input.get(0).getServiceTime());
+                spnOutput.addProcessWaitTimes(input.get(0).getPid(),time - input.get(0).getArrivalTime());
                 //add service time to time
                 time += input.get(0).getServiceTime();
                 //add process turn around time to output
-                spnOutput.addProcessTurnAroundTimes(time - input.get(0).getArrivalTime());
+                spnOutput.addProcessTurnAroundTimes(input.get(0).getPid(),time - input.get(0).getArrivalTime());
                 //remove process from input
                 input.remove(0);
             }
         }
 
-        //calcs average
-        spnOutput.setProcessAverageWaitTimes(spnOutput.averageWaitTime());
-        spnOutput.setProcessAverageTurnAroundTimes(spnOutput.averageTurnAroundTime());
+    }
+
+    //get output
+    public Output getOutput(){
+        return spnOutput;
     }
 
     //prints output in format

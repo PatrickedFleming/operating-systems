@@ -3,52 +3,30 @@
 //Student Number: c3253586
 //date: 2023-08-07
 
-
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Output {
-    private ArrayList<String> processOrder = new ArrayList<String>();
+    private static ArrayList<ProcessInfo> processes;
+    
+    private ArrayList<Integer> processOrder = new ArrayList<Integer>();
     private ArrayList<Integer> processPriority = new ArrayList<Integer>();
-    private ArrayList<Integer> processTimes = new ArrayList<Integer>();
-    private ArrayList<Integer> processWaitTimes = new ArrayList<Integer>();
-    private ArrayList<Integer> processTurnAroundTimes = new ArrayList<Integer>();
     private ArrayList<Integer> processStartTimes = new ArrayList<Integer>();
-    private int processAverageWaitTimes;
-    private int processAverageTurnAroundTimes;
 
-    public void addProcessOrder(String process){
-        processOrder.add(process);
+    private HashMap<Integer, Integer> processWaitTimes = new HashMap<Integer, Integer>();
+    private HashMap<Integer, Integer> processTurnAroundTimes = new HashMap<Integer, Integer>();
+
+    //constructor
+    public Output(ArrayList<ProcessInfo> input){
+        processes =  input;
     }
 
-    public void addProcessPriority(int priority){
-        processPriority.add(priority);
+    //gets
+    public ArrayList<ProcessInfo> getProcesses(){
+        return processes;
     }
 
-    public void addProcessTimes(int time){
-        processTimes.add(time);
-    }
-
-    public void addProcessWaitTimes(int time){
-        processWaitTimes.add(time);
-    }
-
-    public void addProcessTurnAroundTimes(int time){
-        processTurnAroundTimes.add(time);
-    }
-
-    public void addProcessStartTimes(int time){
-        processStartTimes.add(time);
-    }
-
-    public void setProcessAverageWaitTimes(int time){
-        processAverageWaitTimes = time;
-    }
-
-    public void setProcessAverageTurnAroundTimes(int time){
-        processAverageTurnAroundTimes = time;
-    }
-
-    public ArrayList<String> getProcessOrder(){
+    public ArrayList<Integer> getProcessOrder(){
         return processOrder;
     }
 
@@ -56,103 +34,86 @@ public class Output {
         return processPriority;
     }
 
-    public ArrayList<Integer> getProcessTimes(){
-        return processTimes;
-    }
-
-    public ArrayList<Integer> getProcessWaitTimes(){
-        return processWaitTimes;
-    }
-
-    public ArrayList<Integer> getProcessTurnAroundTimes(){
-        return processTurnAroundTimes;
-    }
-    
     public ArrayList<Integer> getProcessStartTimes(){
         return processStartTimes;
     }
 
-    public int getProcessAverageWaitTimes(){
-        return processAverageWaitTimes;
+    public HashMap<Integer,Integer> getProcessWaitTimes(){
+        return processWaitTimes;
     }
 
-    public int getProcessAverageTurnAroundTimes(){
-        return processAverageTurnAroundTimes;
+    public HashMap<Integer, Integer> getProcessTurnAroundTimes(){
+        return processTurnAroundTimes;
     }
 
-    //sort all the processes by process id
-    public void sort(){
-        for(int i = 0; i < processOrder.size(); i++){
-            for(int j = 0; j < processOrder.size(); j++){
-                if(Integer.parseInt(processOrder.get(i).substring(1)) < Integer.parseInt(processOrder.get(j).substring(1))){
-                    String temp = processOrder.get(i);
-                    processOrder.set(i, processOrder.get(j));
-                    processOrder.set(j, temp);
+    //adds
+    public void addProcessOrder(Integer input){
+        processOrder.add(input);
+    }
 
-                    int temp2 = processPriority.get(i);
-                    processPriority.set(i, processPriority.get(j));
-                    processPriority.set(j, temp2);
+    public void addProcessPriority(int input){
+        processPriority.add(input);
+    }
 
-                    temp2 = processTimes.get(i);
-                    processTimes.set(i, processTimes.get(j));
-                    processTimes.set(j, temp2);
+    public void addProcessStartTimes(int input){
+        processStartTimes.add(input);
+    }
 
-                    temp2 = processWaitTimes.get(i);
-                    processWaitTimes.set(i, processWaitTimes.get(j));
-                    processWaitTimes.set(j, temp2);
+    public void addProcessWaitTimes(int pid, int pwt){
+        processWaitTimes.put(pid, pwt);
+    }
 
-                    temp2 = processTurnAroundTimes.get(i);
-                    processTurnAroundTimes.set(i, processTurnAroundTimes.get(j));
-                    processTurnAroundTimes.set(j, temp2);
+    public void addProcessTurnAroundTimes(int pid, int ptt){
+        processTurnAroundTimes.put(pid, ptt);
+    }
 
-                    temp2 = processStartTimes.get(i);
-                    processStartTimes.set(i, processStartTimes.get(j));
-                    processStartTimes.set(j, temp2);
-                }
+    //finds process in processes with same id
+    public int findProcess(int pid){
+        int index = -1;
+        for(int i = 0; i < processes.size(); i++){
+            if(processes.get(i).getPid() == pid){
+                index = i;
             }
         }
+        return index;
     }
 
     //average wait time
-    public int averageWaitTime(){
-        int averageWaitTime = 0;
-        for(int i = 0; i < processWaitTimes.size(); i++){
-            averageWaitTime += processWaitTimes.get(i);
+    public double averageWaitTime(){
+        double total = 0;
+        for(Integer i : processWaitTimes.values()){
+            total += i;
         }
-        averageWaitTime = averageWaitTime/processWaitTimes.size();
-        return averageWaitTime;
+        return total / processWaitTimes.size();
     }
 
     //average turn around time
-    public int averageTurnAroundTime(){
-        int averageTurnAroundTime = 0;
-        for(int i = 0; i < processTurnAroundTimes.size(); i++){
-            averageTurnAroundTime += processTurnAroundTimes.get(i);
+    public double averageTurnAroundTime(){
+        double total = 0;
+        for(Integer i : processTurnAroundTimes.values()){
+            total += i;
         }
-        averageTurnAroundTime = averageTurnAroundTime/processTurnAroundTimes.size();
-        return averageTurnAroundTime;
+        return total / processTurnAroundTimes.size();
     }
 
+    //sumarise
+    public String sum(String input){
+        String output = input + "\t\t" + averageTurnAroundTime() + "\t\t\t" + averageWaitTime() + "\n";
+        return output;
+    }
 
-    
-    //to string
-    String toString(String algorithm){
-        String outputString = "";
-        outputString += algorithm+":\n";
-        //formatt for order and time of proccess loading
-        for(int i = 0; i < this.getProcessOrder().size(); i++){
-            outputString += "T"+ this.getProcessStartTimes().get(i) +": " + this.getProcessOrder().get(i) +"("+this.getProcessPriority().get(i)+")"+ "\n";
+    //prints output in format
+    public String toString(String algorithm){
+        String output = algorithm + ":\n";
+        for(int i = 0; i < processOrder.size(); i++){
+            output += "T"+ processStartTimes.get(i) + ": p" + processOrder.get(i) + "(" + processPriority.get(i) + ")\n";
         }
-        outputString += "\n";
-
-        //sort by id
-        sort();
-        //formate for process turnarround times and waiting times
-        outputString += "Process Turnarround Time Waiting Time\n";
-        for(int i = 0; i < this.getProcessOrder().size(); i++){
-            outputString += this.getProcessOrder().get(i) +"\t"+ this.getProcessTurnAroundTimes().get(i) + "\t\t " + this.getProcessWaitTimes().get(i) + "\n";
+        output += "\n";
+        output += "Process Turnaround Time Waiting Time\n";
+        for(int i = 0; i < processes.size(); i++){
+            output += processes.get(i) + "\t" + processTurnAroundTimes.get(processes.get(i).getPid()) + "\t\t" + processWaitTimes.get(processes.get(i).getPid()) + "\n";
         }
-        return outputString;
+        return output;
     }
 
 }

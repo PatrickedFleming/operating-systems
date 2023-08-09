@@ -8,12 +8,14 @@ public class ProcessInfo {
     int arrivalTime;
     int serviceTime;
     int priority;
+    int currServiceTime;
 
-    public ProcessInfo(int pid, int arrivalTime, int serviceTime, int priority) {
+    public ProcessInfo(int pid, int arrivalTime, int serviceTime, int priority, int currServiceTime) {
         this.pid = pid;
         this.arrivalTime = arrivalTime;
         this.serviceTime = serviceTime;
         this.priority = priority;
+        this.currServiceTime = currServiceTime;
     }
 
     public int getPid() {
@@ -32,6 +34,10 @@ public class ProcessInfo {
         return this.priority;
     }
 
+    public int getCurrServiceTime() {
+        return this.currServiceTime;
+    }
+
     public void setPid(int pid) {
         this.pid = pid;
     }
@@ -48,8 +54,11 @@ public class ProcessInfo {
         this.priority = priority;
     }
 
+    public void setCurrServiceTime(int currServiceTime) {
+        this.currServiceTime = currServiceTime;
+    }
+
     public String toString() {
-        return "PID: " + this.pid + " Arrival Time: " + this.arrivalTime + " Service Time: " + this.serviceTime
-                + " Priority: " + this.priority;
+        return "p" + this.pid;
     }
 }
