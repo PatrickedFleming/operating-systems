@@ -3,7 +3,6 @@
 //Author: Patrick Fleming
 //Student Number: c3253586
 //date: 2023-08-07
-//
 
 import java.util.Comparator;
 

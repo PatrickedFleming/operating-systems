@@ -5,54 +5,91 @@
 
 import java.util.ArrayList;
 
-public class FCFS {
+public class FCFS implements SchedularInterface{
 
-    private static Output fcfsOutput;
+    private ArrayList<ProcessInfo> fcfsInput;
+    private String timeline = "";
+    private String sum = "";
+    private float avgWaitTime;
+    private float avgTurnAroundTime;
 
     public FCFS(ArrayList<ProcessInfo> input){
-        fcfsOutput = new Output(input);
+        fcfsInput = input;
+    }
+    
+    public String getSum(){
+        return sum;
     }
     
     public void run(ArrayList<ProcessInfo> input, int DISP){
         int time = 0;
-
-        //while there are still processes to run
-        while(!input.isEmpty()){
+        int disp = DISP;
+        //sort input by arrival time
+        fcfsInput.sort((ProcessInfo p1, ProcessInfo p2) -> p1.getArrivalTime() - p2.getArrivalTime());
+        while(!fcfsInput.isEmpty()){
             //if time is less then arrival time of next process add time up to arival time
-            if(time < input.get(0).getArrivalTime()){
-                time = input.get(0).getArrivalTime();
+            if(time < fcfsInput.get(0).getArrivalTime()){
+                time = fcfsInput.get(0).getArrivalTime();
             }
 
             //is proccess ready to run
-            if(input.get(0).getArrivalTime() <= time){
-                //add disp to time
-                time += DISP;
-                //add process to output
-                fcfsOutput.addProcessOrder(input.get(0).getPid());
-                //add process priority to output
-                fcfsOutput.addProcessPriority(input.get(0).getPriority());
-                //add process start time to output
-                fcfsOutput.addProcessStartTimes(time);
-                //add process wait time to output
-                fcfsOutput.addProcessWaitTimes(input.get(0).getPid(),time - input.get(0).getArrivalTime());
+            if(fcfsInput.get(0).getArrivalTime() <= time && fcfsInput.get(0).getServiceTimeLeft() > 0){
+                //disp
+                time += disp;
+                //add process to timeline
+                timeline +="T" + time + ": "+ fcfsInput.get(0).getPidString() + "(" + fcfsInput.get(0).getPriority() + ")\n";
+                //set service time left to 0
+                fcfsInput.get(0).setServiceTimeLeft(0);
                 //add service time to time
-                time += input.get(0).getServiceTime();
-                //add process turn around time to output
-                fcfsOutput.addProcessTurnAroundTimes(input.get(0).getPid(),time - input.get(0).getArrivalTime());
-                //remove process from input
-                input.remove(0);
+                time += fcfsInput.get(0).getServiceTime();
+                //add process turn around time
+                fcfsInput.get(0).setTurnAroundTime(time - fcfsInput.get(0).getArrivalTime());
+                //add process wait time
+                fcfsInput.get(0).setWaitTime(time - fcfsInput.get(0).getArrivalTime() - fcfsInput.get(0).getServiceTime());
+
+                //move to next process
+                fcfsInput.remove(0);
             }
         }
+
+        //calculate average wait time
+        avgWaitTime();
+        //calculate average turn around time
+        avgTurnAroundTime();
+        //set sum
+        setSum();
+
+        }
+
+    public void avgWaitTime(){
+        int totalWaitTime = 0;
+        for(int i = 0; i < fcfsInput.size(); i++){
+            totalWaitTime += fcfsInput.get(i).getWaitTime();
+        }
+        avgWaitTime = (float)totalWaitTime / fcfsInput.size();
     }
 
-    //get output
-    public Output getOutput(){
-        return fcfsOutput;
+    public void avgTurnAroundTime(){
+        int totalTurnAroundTime = 0;
+        for(int i = 0; i < fcfsInput.size(); i++){
+            totalTurnAroundTime += fcfsInput.get(i).getTurnAroundTime();
+        }
+        avgTurnAroundTime = (float)totalTurnAroundTime / fcfsInput.size();
+    }
+
+    public void setSum(){
+        sum = "FCFS\t\t" + avgTurnAroundTime + "\t\t" + avgWaitTime;
     }
 
 
-    //prints output in required format
+    //prints output in format
     public String toString(){
-        return fcfsOutput.toString("FCFS");
+        String output = "FCFS: \n";
+        output += timeline;
+        output += "Process\t\tTurnaround Time\t\tWait Time\n";
+        for(int i = 0; i < fcfsInput.size(); i++){
+            output += fcfsInput.get(i).toString();
+        }
+        return output;
     }
 }

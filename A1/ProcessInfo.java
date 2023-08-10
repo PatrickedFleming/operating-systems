@@ -4,61 +4,78 @@
 //Student Number: c3253586
 
 public class ProcessInfo {
-    int pid;
-    int arrivalTime;
-    int serviceTime;
-    int priority;
-    int currServiceTime;
+    private static int pid;
+    private static String pidString;
+    private static int arrivalTime;
+    private static int serviceTime;
+    private static int priority;
 
-    public ProcessInfo(int pid, int arrivalTime, int serviceTime, int priority, int currServiceTime) {
-        this.pid = pid;
-        this.arrivalTime = arrivalTime;
-        this.serviceTime = serviceTime;
-        this.priority = priority;
-        this.currServiceTime = currServiceTime;
+    private int serviceTimeLeft;
+    private int TurnaroundTime;
+    private int WaitTime;
+
+
+    public ProcessInfo(int inputPid, int inputArrivalTime, int inputServiceTime, int inputPriority) {
+        pid = inputPid;
+        pidString = "p" + inputPid;
+        arrivalTime = inputArrivalTime;
+        serviceTime = inputServiceTime;
+        priority = inputPriority;
+        serviceTimeLeft = inputServiceTime;
     }
 
     public int getPid() {
-        return this.pid;
+        return pid;
     }
 
     public int getArrivalTime() {
-        return this.arrivalTime;
+        return arrivalTime;
     }
 
     public int getServiceTime() {
-        return this.serviceTime;
+        return serviceTime;
     }
 
     public int getPriority() {
-        return this.priority;
+        return priority;
     }
 
-    public int getCurrServiceTime() {
-        return this.currServiceTime;
+    public String getPidString() {
+        return pidString;
     }
 
-    public void setPid(int pid) {
-        this.pid = pid;
+    public void setServiceTimeLeft(int inputServiceTimeLeft) {
+        serviceTimeLeft = inputServiceTimeLeft;
     }
 
-    public void setArrivalTime(int arrivalTime) {
-        this.arrivalTime = arrivalTime;
+    public int getServiceTimeLeft() {
+        return serviceTimeLeft;
     }
 
-    public void setServiceTime(int serviceTime) {
-        this.serviceTime = serviceTime;
+    public void setTurnAroundTime(int inputTurnaroundTime) {
+        TurnaroundTime = inputTurnaroundTime;
     }
 
-    public void setPriority(int priority) {
-        this.priority = priority;
+    public int getTurnAroundTime() {
+        return TurnaroundTime;
     }
 
-    public void setCurrServiceTime(int currServiceTime) {
-        this.currServiceTime = currServiceTime;
+    public void setWaitTime(int inputWaitTime) {
+        WaitTime = inputWaitTime;
     }
 
-    public String toString() {
-        return "p" + this.pid;
+    public int getWaitTime() {
+        return WaitTime;
+    }
+
+    public void reset(){
+        serviceTimeLeft = serviceTime;
+        TurnaroundTime = 0;
+        WaitTime = 0;
+    }
+
+    public String toString(){
+        String output = pidString + "\t\t" + TurnaroundTime + "\t\t" + WaitTime + "\n";
+        return output;
     }
 }

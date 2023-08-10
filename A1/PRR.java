@@ -77,7 +77,8 @@ public class PRR {
                     else{
                         //add 2 service time to time
                         time += 2;
-                        //add process to end of input
+                        //insert process to time < arival time of whats in queue
+                        
                         input.add(new ProcessInfo(input.get(0).getPid(), input.get(0).getArrivalTime(), input.get(0).getServiceTime(), input.get(0).getPriority(), input.get(0).getCurrServiceTime() - 2));
                     }
                     //remove process from input

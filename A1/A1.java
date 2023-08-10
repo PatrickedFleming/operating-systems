@@ -42,6 +42,8 @@ public class A1 {
         ppProcesses.sort(new PPComparator());
         pp.run(ppProcesses, DISP);
 
+        //order by arival time
+        prrProcesses.sort((ProcessInfo p1, ProcessInfo p2) -> p1.getArrivalTime() - p2.getArrivalTime());
         prr.run(prrProcesses, DISP);
 
         SummaryOutput sum = new SummaryOutput(fcfs.getOutput(), spn.getOutput(), pp.getOutput(), prr.getOutput());
