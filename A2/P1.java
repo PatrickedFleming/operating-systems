@@ -7,13 +7,25 @@ import java.io.File;
 import java.util.Scanner;
 
 import java.util.ArrayList;
+import java.util.logging.*;
+import static java.util.logging.Level.*;
 
 
 public class P1 {
 
     private static ArrayList<SpaceTravler> travelers = new ArrayList<SpaceTravler>();
+    private static final Logger spaceLog = Logger.getLogger("SpaceLog");
 
     public static void main(String[] args) {
+
+        //sets up logger
+        Handler h = new ConsoleHandler();
+        h.setLevel(FINEST);
+        h.setFormatter(new SpaceLogFormatter());
+        spaceLog.addHandler(h);
+        spaceLog.setLevel(FINEST);
+        spaceLog.setUseParentHandlers(false);
+
         //gets input file
         File inputFile = new File(args[0]);
         //gets Travelers from file
@@ -21,7 +33,7 @@ public class P1 {
 
         //starts travelers
         travelers.forEach((traveler) -> {
-            traveler.start();
+            traveler.run();
         });
 
         //ends travelers

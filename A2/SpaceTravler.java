@@ -4,6 +4,8 @@
 //date: 27/08/2023
 
 import java.util.concurrent.Semaphore;
+import java.util.logging.Logger;
+import static java.util.logging.Level.FINEST;
 
 public class SpaceTravler extends Thread{
     private String name;
@@ -11,6 +13,8 @@ public class SpaceTravler extends Thread{
     private int trips;
     private static final Semaphore Wormhole = new Semaphore(1);
     private static int count = 0;
+
+    private static Logger SpaceLog = Logger.getLogger("SpaceLog");
 
 
     public SpaceTravler(String name, int trips){
@@ -27,19 +31,19 @@ public class SpaceTravler extends Thread{
     @Override
     public void run(){
         try{
-            System.out.println(name + ": Waiting for worhole. Travelling towards "+ destination);
+            SpaceLog.log(FINEST,name + ": Waiting for wormhole. Travelling towards "+ destination);
             Wormhole.acquire();
             for(int i = 0; i < 4; i++){
                 sleep(50);
-                System.out.println(name + ": Crossing wormhole Loading "+ i*25+"%.");
+                SpaceLog.log(FINEST,name + ": Crossing wormhole Loading "+ i*25+"%.");
             }
-            System.out.println(name + ": Across the wormhole.");
+            SpaceLog.log(FINEST,name + ": Across the wormhole.");
             trips--;
             destination = destination.equals("Proxima-b") ? "Earth" : "Proxima-b";
             if(trips == 0){
-                System.out.println(name + " Finished.");
+                SpaceLog.log(FINEST,name + " Finished.");
             }
-            System.out.println("Count = " + ++count);
+            SpaceLog.log(FINEST,"Count = " + ++count);
             Wormhole.release();
             sleep(50);
             if(trips > 0){
