@@ -4,35 +4,55 @@
 //date: 27/08/2023
 
 import java.util.concurrent.Semaphore;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Logger;
-import java.util.logging.Handler;
 
 public class SpaceTravler extends Thread{
     private String name;
-    private int travel;
-    private Semaphore sem;
+    private String destination;
+    private int trips;
+    private static final Semaphore Wormhole = new Semaphore(1);
+    private static int count = 0;
 
-    private Logger spaceLog = Logger.getLogger("spaceLog");
 
-
-    public SpaceTravler(Semaphore sem, String name, int travel){
-        this.sem = sem;
+    public SpaceTravler(String name, int trips){
         this.name = name;
-        this.travel = travel;
-        Handler spaceX = new ConsoleHandler();
-        spaceX.setFormatter(new SpaceLogFormatter());
+        this.trips = trips;
+        if(name.contains("E")){
+            destination = "Proxima-b";
+        }
+        else{
+            destination = "Earth";
+        }
     }
 
     @Override
     public void run(){
         try{
-
-            sem.acquire();
+            System.out.println(name + ": Waiting for worhole. Travelling towards "+ destination);
+            Wormhole.acquire();
+            for(int i = 0; i < 4; i++){
+                sleep(50);
+                System.out.println(name + ": Crossing wormhole Loading "+ i*25+"%.");
+            }
+            System.out.println(name + ": Across the wormhole.");
+            trips--;
+            destination = destination.equals("Proxima-b") ? "Earth" : "Proxima-b";
+            if(trips == 0){
+                System.out.println(name + " Finished.");
+            }
+            System.out.println("Count = " + ++count);
+            Wormhole.release();
+            sleep(50);
+            if(trips > 0){
+                run();
+            }
             
         }catch(InterruptedException e){
             e.printStackTrace();
         }
     }
-    
+
+    @Override
+    public String toString(){
+        return name + " " + trips;
+    }    
 }
