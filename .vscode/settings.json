@@ -1,8 +1,6 @@
 {
     "java.project.sourcePaths": [
         "A1",
-        "A2\\P1",
-        "A2\\P2",
         "A2\\P3"
     ]
 }
