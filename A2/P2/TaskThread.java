@@ -17,6 +17,8 @@ public class TaskThread extends Thread {
     private Semaphore taskSem;
     private CountDownLatch latch;
 
+    
+
     //thread info
     private int threadNumber;
     private Integer input;
@@ -29,11 +31,12 @@ public class TaskThread extends Thread {
     private Date day = new Date();
 
 
-    public TaskThread(int threadNumber, Integer input, String taskOwner, CountDownLatch latch){
+    public TaskThread(int threadNumber, Integer input, String taskOwner, CountDownLatch latch, Semaphore sem){
         this.threadNumber = threadNumber;
         this.input = input;
         this.taskOwner = taskOwner;
         this.latch = latch;
+        taskSem = sem;
     }
 
     @Override
@@ -50,13 +53,5 @@ public class TaskThread extends Thread {
             e.printStackTrace();
         }
     
-    }
-
-    public String getTaskOwner(){
-        return taskOwner;
-    }
-
-    public void setSem(Semaphore sem){
-        taskSem = sem;
     }
 }

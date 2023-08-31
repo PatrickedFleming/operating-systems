@@ -3,6 +3,7 @@
 //Student Number: c3253586
 //date: 27/08/2023
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 import static java.util.logging.Level.FINEST;
@@ -13,13 +14,15 @@ public class SpaceTravler extends Thread{
     private int trips;
     private static final Semaphore Wormhole = new Semaphore(1);
     private static int count = 0;
+    private CountDownLatch startGun;;
 
     private static Logger SpaceLog = Logger.getLogger("SpaceLog");
 
 
-    public SpaceTravler(String name, int trips){
+    public SpaceTravler(String name, int trips, CountDownLatch latch){
         this.name = name;
         this.trips = trips;
+        this.startGun = latch;
         if(name.contains("E")){
             destination = "Proxima-b";
         }
@@ -31,6 +34,7 @@ public class SpaceTravler extends Thread{
     @Override
     public void run(){
         try{
+            startGun.await();
             SpaceLog.log(FINEST,name + ": Waiting for wormhole. Travelling towards "+ destination);
             Wormhole.acquire();
             for(int i = 0; i < 4; i++){

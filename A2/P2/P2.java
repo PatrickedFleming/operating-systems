@@ -7,12 +7,16 @@ import java.io.File;
 import java.util.logging.*;
 import static java.util.logging.Level.*;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class P2 {
 
     private static final Logger outputLog = Logger.getLogger("OutputLog");
     private static HashMap<String, Integer> taskList = new HashMap<String, Integer>();
+    private static ArrayList<Scheduler> schedulers = new ArrayList<Scheduler>();
+    private static CountDownLatch startRace = new CountDownLatch(1);
     
     public static void main(String[] args) {
         //set up logger
@@ -27,17 +31,16 @@ public class P2 {
         File input = new File(args[0]);
         //gets tasks from file
         getTasks(input);
-        //creates scheduler
-        Scheduler scheduler = new Scheduler(taskList);
-        //starts scheduler
-        scheduler.run();
-        //waits for scheduler to finish
-        try{
-            scheduler.join();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
+        //get schedulers
+        getSchedulers();
+        //start schedulers
+        outputLog.log(FINEST, "Server Initialised...");
+        startThreads(schedulers);
+        startRace.countDown();
+        //wait for schedulers to finish
+        joinThreads(schedulers);
+        outputLog.log(FINEST, "All Files Proccesssed.");
+        
     }
 
     private static void getTasks(File file){
@@ -51,6 +54,29 @@ public class P2 {
         }
         catch(Exception e){
             e.printStackTrace();
+        }
+    }
+
+    private static void getSchedulers(){
+        for(String key : taskList.keySet()){
+            schedulers.add(new Scheduler(key, taskList.get(key), startRace));
+        }
+    }
+
+    public static void startThreads(ArrayList<? extends Thread> threads){
+        for(Thread t : threads){
+            t.start();
+        }
+    }
+
+    public static void joinThreads(ArrayList<? extends Thread> threads){
+        for(Thread t : threads){
+            try{
+                t.join();
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
         }
     }
 }
