@@ -3,49 +3,55 @@
 //Student Number: c3253586
 //date: 27/08/2023
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.logging.Logger;
-import static java.util.logging.Level.FINEST;
+import java.util.logging.*;
+import static java.util.logging.Level.*;
 
+import java.text.SimpleDateFormat;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
+import java.util.Date;
 
 public class TaskThread extends Thread {
+
+    private static Logger taskLog = Logger.getLogger("OutputLog");
+    private Semaphore taskSem;
+    private CountDownLatch latch;
+
+    
+
     //thread info
     private int threadNumber;
     private Integer input;
     private String taskOwner;
 
+    
     //output formatting
     private String dateTimeFormate = "EEE MMM dd HH:mm:ss zzz yyyy";
     private SimpleDateFormat formatter = new SimpleDateFormat(dateTimeFormate);
     private Date day = new Date();
 
-    //logger
-    private static Logger taskLog = Logger.getLogger("OutputLog");
 
-    //scheduler
-    private Scheduler scheduler;
-
-
-
-    public TaskThread(int threadNumber, Integer input, String taskOwner, Scheduler taskScheduler){
+    public TaskThread(int threadNumber, Integer input, String taskOwner, CountDownLatch latch, Semaphore sem){
         this.threadNumber = threadNumber;
         this.input = input;
         this.taskOwner = taskOwner;
-        this.scheduler = taskScheduler;
+        this.latch = latch;
+        taskSem = sem;
     }
 
     @Override
     public void run(){
         try{
-            scheduler.waitForProcessor();
+            latch.await();
+            taskSem.acquire();
             int output = input * input;
-            Thread.sleep(input*100);
+            sleep(input*100);
             taskLog.log(FINEST, "Time: "+ formatter.format(day) + ", Task: " + taskOwner + ", Thread No: "+ threadNumber +", Input: " + input + ", Result: " + output);
-            scheduler.releaseProcessor();
+            taskSem.release();
         }
         catch(Exception e){
             e.printStackTrace();
         }
+    
     }
 }

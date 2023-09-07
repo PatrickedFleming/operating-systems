@@ -1,7 +1,7 @@
-//Problem 3 of Assignment 2
+//Problem 2 of Assignment 2
 //Author: Patrick Fleming
 //Student Number: c3253586
-//date: 31/08/2023
+//date: 27/08/2023
 
 import java.io.File;
 import java.util.logging.*;
@@ -11,11 +11,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-public class P3 {
+public class P2 {
 
     private static final Logger outputLog = Logger.getLogger("OutputLog");
     private static HashMap<String, Integer> taskList = new HashMap<String, Integer>();
-    private static ArrayList<P3Scheduler> schedulers = new ArrayList<P3Scheduler>();
+    private static ArrayList<Scheduler> schedulers = new ArrayList<Scheduler>();
     private static CountDownLatch startRace = new CountDownLatch(1);
     
     public static void main(String[] args) {
@@ -59,7 +59,7 @@ public class P3 {
 
     private static void getSchedulers(){
         for(String key : taskList.keySet()){
-            schedulers.add(new P3Scheduler(key, taskList.get(key)));
+            schedulers.add(new Scheduler(key, taskList.get(key), startRace));
         }
     }
 
@@ -78,9 +78,5 @@ public class P3 {
                 e.printStackTrace();
             }
         }
-    }
-
-    public static CountDownLatch getStartRace(){
-        return startRace;
     }
 }
