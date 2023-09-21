@@ -8,10 +8,12 @@ public class A3 {
     private static int quantum;
     private static int pages;
     private static LinkedList<Process> processes = new LinkedList<Process>();
+    private static int count = 0;
     
     public static void main(String[] args) {
         getData(args);
         Scheduler scheduler = new Scheduler(quantum, pages, processes);
+        scheduler.printResults();
     }
 
 
@@ -20,8 +22,8 @@ public class A3 {
             pages = Integer.parseInt(arguments[0]);
             quantum = Integer.parseInt(arguments[1]);
             for(int i = 2; i < arguments.length; i++){
-                File inputFile = new File(arguments[i]);
-                CreateProcesses(inputFile);
+               File inputFile = new File(arguments[i]);
+               CreateProcesses(inputFile);
             }
         }
         catch(Exception e){
@@ -35,22 +37,23 @@ public class A3 {
 
     private static void CreateProcesses(File input) throws InputMismatchException{
         try(Scanner sc = new Scanner(input)){
-            while(sc.hasNext()){
-                Process process = new Process();
-                if(sc.hasNext("name:")){
-                    process.setName((sc.next().substring(6, sc.next().indexOf(";"))));
+            Process process = new Process();
+            while(sc.hasNextLine()){
+                String line = sc.nextLine();
+                String[] data = line.split(";");
+                for(String s: data){
+                    if(s.contains("name:")){
+                        process.setName(s.substring(5));
+                    }
+                    else if(s.contains("page:")){
+                        process.addPage(new Page(s.substring(5)));
+                    }
+                    else if(s.contains("end")){
+                        processes.add(process);
+                        break;
+                    }
                 }
-                if(sc.hasNext("page:")){
-                    process.addPage();
-                }
-                if(process.getPages() > 50){
-                    throw new InputMismatchException("Invalid number of pages");
-                }
-                if(sc.hasNext("end;")){
-                    processes.add(process);
-                    break;
-                }
-            }
+            }  
         }
         catch(Exception e){
             System.out.println("Error: Invalid input file");

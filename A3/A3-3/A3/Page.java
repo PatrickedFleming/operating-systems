@@ -1,42 +1,35 @@
 public class Page {
-    private int id;
-    private boolean assigned = false;
-    private Process parent;
-    private Frame frame;
+    private String pageID;
+    private boolean loaded = false;
+    private boolean finished = false;
 
-    public Page(Process parent, int id){
-        this.parent = parent;
-        this.id = id;
+
+    public Page(String page){
+        this.pageID = page;
     }
 
-    public int getId(){
-        return id;
+    public String getPageID(){
+        return pageID;
     }
 
-    public void setId(int id){
-        this.id = id;
-    }   
-
-    public boolean isAssigned(){
-        return assigned;
+    public void setPageID(String pageID){
+        this.pageID = pageID;
     }
 
-    public void assign(Frame frame){
-        this.frame = frame;
-        assigned = true;
+    public boolean isLoaded(){
+        return loaded;
     }
 
-    public Frame getFrame(){
-        return frame;
+    public void setLoaded(boolean loaded){
+        this.loaded = loaded;
     }
 
-    public void unassign(){
-        this.frame = null;
-        assigned = false;
+    public boolean isFinished(){
+        return finished;
     }
 
-    public Process getParent(){
-        return parent;
+    public void setFinished(boolean finished){
+        this.finished = finished;
     }
-    
+
 }
