@@ -1,164 +1,292 @@
-
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.HashMap;
 
 public class Scheduler {
-    private int Quantum;
-    private int Time;
-    private int FrameNumber;
-    private int allocatedFrames = 0;
-    private int dispatchTime = 6;
-
-    private LinkedList<Process> readyQueue = new LinkedList<Process>();
-    private LinkedList<Process> blockedQueue = new LinkedList<Process>();
-
-    private boolean finished = false;
-    private HashMap<Integer, PageFrame> frames = new HashMap<Integer, PageFrame>();
-
     private LinkedList<Process> processes;
+    private int quantum;
+    private int frames;
+    private int alocatedframes;
+    private int time = 0;
+    private IO io;
 
-    private Process currentProcess;
+    private Process current;
+
+    private LinkedList<Process> ready = new LinkedList<Process>();
+    private LinkedList<Process> blocked = new LinkedList<Process>();
+    private LinkedList<Process> finished = new LinkedList<Process>();
+
+    private HashMap<Integer,ProcessData> Globaldata = new HashMap<Integer,ProcessData>();
+    private HashMap<Integer,ProcessData> Localdata = new HashMap<Integer,ProcessData>();
+
+    private String localoutput = "Clock - Fixed-Local Replacement:\nPID \tProcess-Name \tTurnaround \t# Faults \tFault-Times";
+    private String globaloutput = "Clock - Variable-Global Replacement:\nPID \tProcess-Name \tTurnaround \t# Faults \tFault-Times";
 
 
-    public Scheduler(int quantum, int frames, LinkedList<Process> processes){
-        this.Quantum = quantum;
-        this.FrameNumber = frames;
+    public Scheduler(LinkedList<Process> processes, int q, int p){
         this.processes = processes;
-        start();
+        this.quantum = q;
+        this.frames = p;
+        this.alocatedframes = p/processes.size();
+        this.io = new IO(p);
     }
 
 
     public void start(){
-        SetupFrames();
-        LoadProcesses();
-        for(Time = 0; Time <40; Time++){
-            unBlock();
-            getCurrentProcess();
-            run();
-            checkFinished();
+        for(Process p: processes){
+            p.setQuantum(quantum);
+            p.setId(processes.indexOf(p));
+            Localdata.put(p.getId(),new ProcessData(p.getId(), p));
+            p.setCount(alocatedframes*p.getId());
+            ready.add(p);
+        }
+        current = ready.removeFirst();
+        local();
+        System.out.println(localoutput);
+        for(ProcessData p: Localdata.values()){
+            System.out.println(p);
+        }
+        reset();
+        global();
+        System.out.println(globaloutput);
+        for(ProcessData p: Globaldata.values()){
+            System.out.println(p);
         }
     }
 
-    private void getCurrentProcess(){
-        if(currentProcess == null){
-            if(!readyQueue.isEmpty()){
-                currentProcess = readyQueue.getFirst();
-                currentProcess.setNextTask();
+    public void reset(){
+        io.reset();
+        blocked.clear();
+        ready.clear();
+        finished.clear();
+        for(Process p: processes){
+            p.reset();
+            p.setQuantum(quantum);
+            ready.add(p);
+            Globaldata.put(p.getId(),new ProcessData(p.getId(), p));
+        }
+        current = ready.removeFirst();
+    }
+
+    public void local(){
+        for(time = 0; finished.size() != processes.size(); time++){
+            unblockLocal();
+            runLocal();
+            
+        }
+    }
+
+    private void unblockLocal(){
+        for(Process p: blocked){
+            if(p.unblock(time)){
+                p.setCount(io.load((p.getId()*(alocatedframes)), ((p.getId()*(alocatedframes))+ alocatedframes), p.getCount(),p.getPage()));
+                ready.add(p);
             }
         }
-        else{
-            if(currentProcess.isFinished()){
-                currentProcess = null;
-                readyQueue.remove(currentProcess);
+        for(Process p: ready){
+            if(blocked.contains(p)){
+                blocked.remove(p);
             }
         }
     }
 
-    private void doTask(){
-        if(currentProcess == null){
-            return;
-        }
-        else{
-            currentProcess.setTaskDone();
+    public void global(){
+        for(time = 0;finished.size() != processes.size() ; time++){
+            unblock();
+            runGlobal();
         }
     }
 
-    private void run(){
-        if(!isReady()){
-            block();
+    private void unblock(){
+        for(Process p: blocked){
+            if(p.unblock(time)){
+                io.load(p.getPage());
+                ready.add(p);
+            }
         }
-        else{
-            doTask();
+        for(Process p: ready){
+            if(blocked.contains(p)){
+                blocked.remove(p);
+            }
         }
     }
 
-    private void block(){
-        if(currentProcess != null){
-            blockedQueue.add(currentProcess);
-            currentProcess.setTimeUnblocked(Time + dispatchTime);
-            currentProcess.addFault(Time);
-            if(!readyQueue.isEmpty()){
-                currentProcess = readyQueue.poll();
-                run();
+    private void faultGlobal(){
+        current.setUnblockTime(time + 5);
+        Globaldata.get(current.getId()).fault(time);
+        current.setQuantum(quantum);
+        blocked.add(current);
+        if(!ready.isEmpty()){
+            current = ready.removeFirst();
+        }
+        else{
+            current = null;
+        }
+    }
+
+     private void faultlocal(){
+        current.setUnblockTime(time + 5);
+        Localdata.get(current.getId()).fault(time);
+        current.setQuantum(quantum);
+        blocked.add(current);
+        if(!ready.isEmpty()){
+            current = ready.removeFirst();
+        }
+        else{
+            current = null;
+        }
+    }
+
+    private void runLocal(){
+        if(current != null){
+            if(current.getPage().getPageID().equalsIgnoreCase("end")){
+                current.setfinish(true);
+                finishLocal(0);
+                if(!ready.isEmpty()){
+                    current = ready.removeFirst();
+                }
+                else{
+                    current = null;
+                }
+                runLocal();
             }
             else{
-                currentProcess = null;
+                    if(current.getQuantum() > 0){
+                        if(LoadedLocal()){
+                            current.setQuantum(current.getQuantum() - 1);
+                            current.getNextLocal();
+                            
+                        }
+                        else{
+                            faultlocal();
+                            runLocal();
+                        }
+                    }
+                    else{
+                        if(current.getQuantum() == 0){
+                            if(LoadedLocal()){
+                                current.setQuantum(quantum);
+                                ready.add(current);
+                                current = null;
+                                runLocal(); 
+                            }
+                            else{
+                                faultlocal();
+                                runLocal();
+                            }
+                        }
+                    }
+                }
             }
-        }
+            else{
+                if(!ready.isEmpty()){
+                    current = ready.removeFirst();
+                    runLocal();
+                }
+                else{
+                    current = null;
+                }
+            }
+       
     }
 
-    private void unBlock(){
-        if(!blockedQueue.isEmpty()){
-            for(int i = 0; i < blockedQueue.size(); i++){
-                Process p = blockedQueue.get(i);
-                if(p.getTimeUnblocked() == Time && !p.isFinished()){
-                    p.loadPage(p.getId() * allocatedFrames, (p.getId() + 1) * allocatedFrames);
-                    readyQueue.add(p);
-                    blockedQueue.remove(p);
+    private void runGlobal(){
+        if(current != null){
+            if(current.getPage().getPageID().equalsIgnoreCase("end")){
+                current.setfinish(true);
+                finishGlobal(0);
+                if(!ready.isEmpty()){
+                    current = ready.removeFirst();
+                }
+                else{
+                    current = null;
+                }
+                runGlobal();
+            }
+            else{
+                if(current.getQuantum() > 0){
+                    if(LoadedGlobal()){
+                        current.setQuantum(current.getQuantum() - 1);
+                        current.getNextGlobal();
+                    }
+                    else{
+                        faultGlobal();
+                        runGlobal();
+                    }
+                }
+                else{
+                    if(current.getQuantum() == 0){
+                            if(LoadedGlobal()){
+                                current.setQuantum(quantum);
+                                ready.add(current);
+                                current = null;
+                                runGlobal();
+                            }
+                            else{
+                                faultGlobal();
+                                runGlobal();
+                            }
+                        }
                 }
             }
         }
-    }
-
-
-
-    private void checkFinished(){
-        boolean check = true;
-        for(Process p: processes){
-            if(!p.isFinished()){
-                check = false;
+        else{
+            if(!ready.isEmpty()){
+                current = ready.removeFirst();
+                runGlobal();
+            }
+            else{
+                current = null;
             }
         }
-        if(check){
-            finished = true;
-        } 
+       
+    }
+
+    private void finishLocal(int ofset){
+        if(current != null){
+            if(current.getPage().getPageID().equalsIgnoreCase("end")){
+                finished.add(current);
+                Localdata.get(current.getId()).setTurnarroundTime(time + ofset);
+                current = null;
+            }
+        }
+
+    }
+
+    private void finishGlobal(int ofset){
+        if(current != null){
+            if(current.getPage().getPageID().equalsIgnoreCase("end")){
+                finished.add(current);
+                Globaldata.get(current.getId()).setTurnarroundTime(time + ofset);
+                current = null;
+            }
+        }
     }
 
 
-    private void LoadProcesses(){
-        int count = 0;
-        for(Process p: processes){
-            readyQueue.add(p);
-            p.setId(count);
-            p.setFrameMap(frames);
-            count++;
-        }
-    }
-
-     private void SetupFrames(){
-        for(int i = 0; i < FrameNumber; i++){
-            frames.put(i, new PageFrame());
-        }  
-        allocatedFrames = 0;
-        allocatedFrames = (int)Math.floor(FrameNumber/processes.size());
-        for(Process p: processes){
-            p.setFrames(allocatedFrames);
-        }
-    }   
-    
-
-    public void printResults(){
-        System.out.println("Clock - Fixed-Local Replacement:");
-        System.out.println("PID  \tProcess-Name  \tTurnaround \t# Faults \tFault Times");
-        for(Process p: processes){
-            System.out.println(p.getId() + "\t" + p.getName() + "\t\t" + p.getTurnaroundTime() + "\t\t" + p.getFaults() + "\t\t" + p.getFaultTimes());
-        }
-    }
-
-    private boolean isReady(){
-        if(currentProcess == null){
-            return true;
-        }
-        else{
-            if(currentProcess.isLoaded()){
+    private boolean LoadedGlobal(){
+        if(current != null){
+            if(io.search(current.getPage())){
                 return true;
             }
             else{
                 return false;
             }
         }
+        return false;
         
     }
-    
+
+    private boolean LoadedLocal(){
+        if(current != null){
+            if(io.search((current.getId()*(alocatedframes)), ((current.getId()*(alocatedframes))+ (alocatedframes)), current.getPage())){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+        return false;
+        
+    }
+  
 }

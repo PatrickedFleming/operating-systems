@@ -1,16 +1,14 @@
-public class PageFrame {
+public class Frame {
     private boolean free = true;
-    private Page page;
+    private Page instruction;
     
 
     public void load(Page pg){
-        this.page = pg;
-        this.page.setLoaded(true);
+        this.instruction = pg;
         free = false;
     }
 
     public void unload(){
-        this.page.setLoaded(false);
         free = true;
     }
 
@@ -18,6 +16,9 @@ public class PageFrame {
         return free;
     }
 
+    public Page getInstruction(){
+        return instruction;
+    }
 
-    
+        
 }

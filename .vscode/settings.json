@@ -1,5 +1,6 @@
 {
     "java.project.sourcePaths": [
         "A3\\A3-3\\A3"
-    ]
+    ],
+    "java.project.explorer.showNonJavaResources": false
 }

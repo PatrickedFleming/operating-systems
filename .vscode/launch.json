@@ -8,21 +8,16 @@
             "type": "java",
             "name": "Current File",
             "request": "launch",
-            "mainClass": "${file}",
+            "mainClass": "${file}"
         },
         {
             "type": "java",
-            "name": "A1",
+            "name": "A3",
             "request": "launch",
-            "mainClass": "A1",
-            "projectName": "operating systems_5bfd4b4d"
-        },
-        {
-            "type": "java",
-            "name": "tester",
-            "request": "launch",
-            "mainClass": "tester",
-            "projectName": "operating systems_5bfd4b4d"
+            "mainClass": "A3",
+            "projectName": "operating systems_5bfd4b4d",
+            "cwd": "${workspaceFolder}/A3/A3-3/A3",
+            "args": "16 3 Process1.txt Process2.txt Process3.txt Process4.txt"
         }
     ]
 }
